@@ -1,8 +1,10 @@
 package poker.app.view;
 
 import java.net.URL;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
-
+import javax.swing.text.html.HTMLDocument.Iterator;
 import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,6 +20,8 @@ import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import poker.app.MainApp;
 import pokerBase.Action;
+import pokerBase.GamePlay;
+import pokerBase.Player;
 import pokerBase.Table;
 import pokerEnums.eAction;
 import pokerEnums.ePlayerPosition;
@@ -31,13 +35,13 @@ public class PokerTableController implements Initializable {
 	}
 
 	@FXML
-	private ImageView imgViewDealerButtonPos1;
+	private static ImageView imgViewDealerButtonPos1;
 	@FXML
-	private ImageView imgViewDealerButtonPos2;
+	private static ImageView imgViewDealerButtonPos2;
 	@FXML
-	private ImageView imgViewDealerButtonPos3;
+	private static ImageView imgViewDealerButtonPos3;
 	@FXML
-	private ImageView imgViewDealerButtonPos4;
+	private static ImageView imgViewDealerButtonPos4;
 
 	@FXML
 	private BorderPane OuterBorderPane;
@@ -45,7 +49,7 @@ public class PokerTableController implements Initializable {
 	@FXML
 	private Label lblNumberOfPlayers;
 	@FXML
-	private TextArea txtPlayerArea;
+	private static TextArea txtPlayerArea;
 
 	@FXML
 	private Button btnStartGame;
@@ -100,6 +104,19 @@ public class PokerTableController implements Initializable {
 		mainApp.messageSend(act);
 	}
 
+	@SuppressWarnings("rawtypes")
+	public void setNbrOfPlayers(Table table) {
+		Iterator iterate = (Iterator)table.getHashPlayers().entrySet().iterator();
+		txtPlayerArea.setText("Table ID: " + table.getTableID().toString() + '\n');
+		
+		while (((java.util.Iterator) iterate).hasNext()) {
+			Player pl = (Player) ((Entry) table).getValue();
+			txtPlayerArea.appendText("Player: " + pl.getPlayerName() + " Position: " + pl.getiPlayerPosition() + " ID: " + pl.getiPokerClientID() + '\n');
+		}
+		
+		return;
+	}
+	
 	public void btnSitLeave_Click(ActionEvent event) {
 		ToggleButton btnSitLeave = (ToggleButton) event.getSource();
 		int iPlayerPosition = 0;
@@ -136,29 +153,112 @@ public class PokerTableController implements Initializable {
 		System.out.println("Message received by PokerTableController: " + strMessage);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public void Handle_TableState(Table HubPokerTable) {
 
-		//TODO: If this message is called, that means there
-		//		was a change to the state of the Table (player
-		//		probably ran 'sit' or 'leave'
-		//		The Table was updated, you just have to refresh the
-		//		UI controls to show the current state of the 
-		//		Table object
+		// If this message is called, that means there was a change to
+		// the state of the Table (player probably ran 'sit' or 'leave')
+		// The Table was updated, you just have to refresh the UI
+		// controls to show the current state of the Table object
 		
-		//TODO: run the 'getHashPlayers' method, iterate 
-		//		for all players and update the player label
-		//		and state of the sit/leave button.
+		lblPos1Name.setText("");
+		btnPos1SitLeave.setVisible(true);
+		btnPos1SitLeave.setText(btnPos1SitLeave.isSelected() ? "Leave" : "Sit");
+		
+		lblPos2Name.setText("");
+		btnPos2SitLeave.setVisible(true);
+		btnPos2SitLeave.setText(btnPos2SitLeave.isSelected() ? "Leave" : "Sit");
+		
+		lblPos3Name.setText("");
+		btnPos3SitLeave.setVisible(true);
+		btnPos3SitLeave.setText(btnPos3SitLeave.isSelected() ? "Leave" : "Sit");
+		
+		lblPos4Name.setText("");
+		btnPos4SitLeave.setVisible(true);
+		btnPos4SitLeave.setText(btnPos4SitLeave.isSelected() ? "Leave" : "Sit");
+		
+		btnStartGame.setDisable(HubPokerTable.getHashPlayers().size() > 0 ? false : true);
+		FadeButton(btnStartGame);
 
-		//		Example: Joe sits at Position 1
-		//		Joe should see the 'Sit' button in position 1 in the
-		//		'pressed in' state, and with 
+		Iterator iterate = (Iterator) HubPokerTable.getHashPlayers().entrySet().iterator();
+		
+		while (((java.util.Iterator) iterate).hasNext()) {
+			
+			Player pl = (Player) ((Entry) HubPokerTable).getValue();
+			
+			switch (pl.getiPlayerPosition()) {
+
+				case 1:
+					if (pl.getPlayerID().equals(mainApp.getPlayer().getPlayerID())) {
+						btnPos1SitLeave.setVisible(true);
+						btnPos2SitLeave.setVisible(false);
+						btnPos3SitLeave.setVisible(false);
+						btnPos4SitLeave.setVisible(false);
+					} 
+					else {
+						btnPos1SitLeave.setVisible(false);
+					}
+						lblPos1Name.setText(pl.getPlayerName().toString());
+						break;
+
+				case 2:
+					if (pl.getPlayerID().equals(mainApp.getPlayer().getPlayerID())) {
+						btnPos1SitLeave.setVisible(false);
+						btnPos2SitLeave.setVisible(true);
+						btnPos3SitLeave.setVisible(false);
+						btnPos4SitLeave.setVisible(false);
+					} 
+					else {
+						btnPos2SitLeave.setVisible(false);
+					}
+						lblPos2Name.setText(pl.getPlayerName().toString());
+						break;
+
+				case 3:
+					if (pl.getPlayerID().equals(mainApp.getPlayer().getPlayerID())) {
+						btnPos1SitLeave.setVisible(false);
+						btnPos2SitLeave.setVisible(false);
+						btnPos3SitLeave.setVisible(true);
+						btnPos4SitLeave.setVisible(false);
+					} 
+					else {
+						btnPos3SitLeave.setVisible(false);
+					}
+						lblPos3Name.setText(pl.getPlayerName().toString());
+						break;
+
+				case 4:
+					if (pl.getPlayerID().equals(mainApp.getPlayer().getPlayerID())) {
+						btnPos1SitLeave.setVisible(false);
+						btnPos2SitLeave.setVisible(false);
+						btnPos3SitLeave.setVisible(false);
+						btnPos4SitLeave.setVisible(true);
+					} 
+					else {
+						btnPos4SitLeave.setVisible(false);
+					}
+						lblPos4Name.setText(pl.getPlayerName().toString());
+						break;
+				}
+			}
+		}
+
+	
+	// A GameState method wasn't originally listed but the messageRecieved method in
+	// the MainApp made us think there should be to handle "GamePlay - level action",
+	// which we were unsure of what this entailed; all we found aside from the mid-round
+	// functions like betting, checking, and folding was moving the dealer chip around.
+	
+	public void Handle_GameState(GamePlay HubGamePlay) {
+		HubGamePlay.getGamePlayers().get(HubGamePlay.getGameDealer());
 	}
-
+	
 	@FXML
 	void btnStart_Click(ActionEvent event) {
 		// Start the Game
-		//TODO: Create an instance of Action, Action = StartGame
-		//		Send the message to the hub
+		Action StartGame = new Action(eAction.StartGame, mainApp.getPlayer());		
+		mainApp.messageSend(StartGame);
+			
 	}
 
 	@FXML
@@ -228,9 +328,6 @@ public class PokerTableController implements Initializable {
 		ft.setToValue(0.3);
 		ft.setCycleCount(4);
 		ft.setAutoReverse(true);
-
 		ft.play();
+		}
 	}
-
-
-}

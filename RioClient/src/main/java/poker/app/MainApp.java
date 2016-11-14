@@ -236,7 +236,7 @@ public class MainApp extends Application {
 		
 		/*
 		 * messageReceived will get an Object message... it's up to you to determine
-		 * what should happen to that the message.
+		 * what should happen to that message.
 		 * 
 		 * If it's a Table, handle Table - level action
 		 * If it's a GamePlay, handle GamePlay - level action
@@ -246,20 +246,20 @@ public class MainApp extends Application {
 			Platform.runLater(() -> {		
 				System.out.println("Message Received.  The message: " + message);
 				
-				if (message instanceof String)
-				{				
+				if (message instanceof String) {				
 					System.out.println("Message Received " + message);
 				}
-				else if (message instanceof Table)
-				{
-					//TODO: If the message is a Table, run the 
-					//		method Handle_TableState in the 
-					//		pokerController.
+				
+				else if (message instanceof Table) {				
+					pokerController.Handle_TableState((Table)message);
+					pokerController.setNbrOfPlayers((Table)message);
 				}
-				pokerController.MessageFromMainApp((String)message);
+				
+				else if (message instanceof GamePlay) {
+					pokerController.Handle_GameState((GamePlay)message);
+				}
 			});
 		}
-		
 		
 		@Override
 		/*
@@ -272,7 +272,5 @@ public class MainApp extends Application {
 		        System.exit(0);
 			});
 	    }
-	
-
 	}
 }
